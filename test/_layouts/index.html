@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>Parseltongue</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<div id="page">
+
+<h1>Parseltongue</h1>
+
+{% block content %}
+
+<ul id="latest">
+{% for post in latest %}
+    <li>
+        <time>{{ post.created }}</time>
+        <a href="/{{ post.url }}">{{ post.title }}</a>
+    </li>
+{% endfor %}
+</li>
+
+{% endblock %}
+
+</div>
+
+</body>
+</html>
