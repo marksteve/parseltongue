@@ -78,9 +78,6 @@ def load_posts():
     Loads all posts from posts directory
     """
 
-    if not os.path.exists(config.posts_dir):
-        raise IOError("%s does not exist!", config.posts_dir)
-
     posts = []
     for post_path in glob.glob(os.path.join(config.posts_dir, '*.md')):
         posts.append(Post.from_file(post_path))
