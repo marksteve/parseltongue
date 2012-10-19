@@ -59,13 +59,15 @@ class Post(collections.namedtuple('Post',
         else:
             post_st = os.stat(path)
             posted_ts = int(post_st.st_ctime)
-            with open(path, 'a') as f:
-                f.write("\n\n\n<!-- posted: %d -->" % posted_ts)
         posted = datetime.fromtimestamp(posted_ts)
 
         post_bn = os.path.basename(path).rsplit('.', 1)[0]
         is_draft = post_bn.startswith('__')
         is_listed = not post_bn.startswith('_')
+
+        if not is_draft:
+            with open(path, 'a') as f:
+                f.write("\n\n\n<!-- posted: %d -->" % posted_ts)
 
         url = "%s/%s/%s/%s.html" % (posted.year, posted.month, posted.day,
             post_bn)
