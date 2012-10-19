@@ -30,7 +30,7 @@ Config = collections.namedtuple('Config',
 
 config = Config(
     posts_dir='_posts',
-    templates_dir='_layouts',
+    templates_dir='_templates',
     latest_count=5,
     )
 
