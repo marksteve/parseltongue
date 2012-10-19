@@ -14,7 +14,7 @@
 <ul id="latest">
 {% for post in latest %}
     <li>
-        <time>{{ post.created }}</time>
+        <time>{{ "%s-%s-%s" % (post.created.year, post.created.month, post.created.day) }}</time>
         <a href="{{ post.url }}">{{ post.title }}</a>
     </li>
 {% endfor %}
