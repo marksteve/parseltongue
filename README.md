@@ -17,3 +17,4 @@ python -m SimpleHTTPServer
 
 * Navigation
 * Archives
+* Categories
