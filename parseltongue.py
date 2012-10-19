@@ -7,6 +7,7 @@ import collections
 import glob
 import logging
 import os
+import re
 
 
 from jinja2 import Environment, FileSystemLoader
@@ -14,6 +15,7 @@ from markdown2 import markdown
 
 
 __version__ = '0.0.0'
+POSTED_PAT = re.compile("<!-- posted: (\d+) -->")
 
 
 # Setup logging
@@ -38,7 +40,7 @@ config = Config(
 # Post model
 
 class Post(collections.namedtuple('Post',
-    'title body created modified published listed url')):
+    'title body posted published listed url')):
     """
     The post model. Post metadata is from the file itself. Much cleaner than
     adding headers.
@@ -47,21 +49,28 @@ class Post(collections.namedtuple('Post',
     @classmethod
     def from_file(cls, path):
         with open(path, 'r') as f:
-            contents = f.readlines()
-            title = contents[0].strip()
-            body = markdown(''.join(contents[1:]).strip())
+            contents = f.read()
+        title, body = contents.split('\n', 1)
+        body = markdown(body)
 
-        post_st = os.stat(path)
-        created = datetime.fromtimestamp(int(post_st.st_ctime))
-        modified = datetime.fromtimestamp(int(post_st.st_mtime))
+        match = POSTED_PAT.search(body)
+        if match:
+            posted_ts = int(match.group(1))
+        else:
+            post_st = os.stat(path)
+            posted_ts = int(post_st.st_ctime)
+            with open(path, 'a') as f:
+                f.write("\n\n\n<!-- posted: %d -->" % posted_ts)
+        posted = datetime.fromtimestamp(posted_ts)
 
-        post_bn = os.path.basename(path)
+        post_bn = os.path.basename(path).rsplit('.', 1)[0]
         published = not post_bn.startswith('__')
         listed = not post_bn.startswith('_')
-        url = "%s/%s/%s/%s.html" % (created.year, created.month, created.day,
-            post_bn.rsplit('.', 1)[0])
 
-        return cls(title, body, created, modified, published, listed, url)
+        url = "%s/%s/%s/%s.html" % (posted.year, posted.month, posted.day,
+            post_bn)
+
+        return cls(title, body, posted, published, listed, url)
 
 
 def load_posts():
@@ -78,7 +87,7 @@ def load_posts():
 
     logger.info("Loaded %d posts.", len(posts))
 
-    return list(reversed(sorted(posts, key=lambda post: post.created)))
+    return list(reversed(sorted(posts, key=lambda post: post.posted)))
 
 
 def render_posts(env, posts):
