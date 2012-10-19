@@ -40,7 +40,7 @@ config = Config(
 # Post model
 
 class Post(collections.namedtuple('Post',
-    'title body posted published listed url')):
+    'title body posted is_draft is_listed url')):
     """
     The post model. Post metadata is from the file itself. Much cleaner than
     adding headers.
@@ -64,13 +64,13 @@ class Post(collections.namedtuple('Post',
         posted = datetime.fromtimestamp(posted_ts)
 
         post_bn = os.path.basename(path).rsplit('.', 1)[0]
-        published = not post_bn.startswith('__')
-        listed = not post_bn.startswith('_')
+        is_draft = post_bn.startswith('__')
+        is_listed = not post_bn.startswith('_')
 
         url = "%s/%s/%s/%s.html" % (posted.year, posted.month, posted.day,
             post_bn)
 
-        return cls(title, body, posted, published, listed, url)
+        return cls(title, body, posted, is_draft, is_listed, url)
 
 
 def load_posts():
@@ -100,7 +100,7 @@ def render_posts(env, posts):
     templates = env.list_templates()
 
     for post in posts:
-        if not post.published:
+        if post.is_draft:
             logger.info("Skipped %s", post.url)
             continue
 
@@ -134,7 +134,7 @@ def render_index(env, posts):
     for post in posts:
         if i >= config.latest_count:
             break
-        elif post.listed:
+        elif post.is_listed:
             latest.append(post)
             i += 1
 
