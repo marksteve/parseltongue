@@ -8,7 +8,7 @@ Yet another blog thingy
 git clone https://github.com/marksteve/parseltongue.git
 cd parseltongue
 python setup.py install
-cd test
+git checkout gh-pages
 parseltongue
 python -m SimpleHTTPServer
 ```
