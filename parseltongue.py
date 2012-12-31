@@ -56,16 +56,18 @@ class Post(collections.namedtuple('Post',
         match = POSTED_PAT.search(body)
         if match:
             posted_ts = int(match.group(1))
+            is_new = False
         else:
             post_st = os.stat(path)
             posted_ts = int(post_st.st_ctime)
+            is_new = True
         posted = datetime.fromtimestamp(posted_ts)
 
         post_bn = os.path.basename(path).rsplit('.', 1)[0]
         is_draft = post_bn.startswith('__')
         is_listed = not post_bn.startswith('_')
 
-        if not is_draft:
+        if is_new and not is_draft:
             with open(path, 'a') as f:
                 f.write("\n\n\n<!-- posted: %d -->" % posted_ts)
 
