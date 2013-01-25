@@ -51,7 +51,7 @@ class Post(collections.namedtuple('Post',
         with open(path, 'r') as f:
             contents = f.read()
         title, body = contents.split('\n', 1)
-        body = markdown(body)
+        body = markdown(body, extras=['fenced-code-blocks'])
 
         match = POSTED_PAT.search(body)
         if match:
