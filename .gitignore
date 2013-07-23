@@ -1,4 +1,11 @@
+*/
+*.html
 *.pyc
-*.egg-info
-build/
-dist/
+
+!_posts/
+!_templates/
+!_templates/*.html
+
+!css/
+!img/
+!js/

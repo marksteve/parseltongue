@@ -9,16 +9,25 @@
 </head>
 <body>
 <div id="page">
-<h1>Parseltongue</h1>
+<h1><a href="/">Parseltongue</a></h1>
 {% block content %}
+<h2>Latest posts</h2>
 <ul id="latest">
 {% for post in latest %}
     <li>
         <time>{{ "%s-%s-%s" % (post.posted.year, post.posted.month, post.posted.day) }}</time>
-        <a href="{{ post.url }}">{{ post.title }}</a>
+        <a href="{{ post.url_path }}">{{ post.title }}</a>
     </li>
 {% endfor %}
-</li>
+</ul>
+<h2>Pages</h2>
+<ul id="pages">
+{% for post in pages %}
+    <li>
+        <a href="{{ post.url_path }}">{{ post.title }}</a>
+    </li>
+{% endfor %}
+</ul>
 {% endblock %}
 </div>
 </body>

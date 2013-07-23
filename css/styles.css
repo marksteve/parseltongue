@@ -7,7 +7,7 @@ body {
     width: 640px;
 }
 
-#latest {
+ul {
     list-style: none;
     padding: 0;
 }
