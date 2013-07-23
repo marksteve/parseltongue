@@ -8,6 +8,7 @@ import glob
 import logging
 import os
 import re
+import time
 
 
 from jinja2 import Environment, FileSystemLoader
@@ -28,26 +29,62 @@ logger.addHandler(logging.StreamHandler())
 # Config
 
 Config = collections.namedtuple('Config',
-    'posts_dir templates_dir latest_count')
+    'posts_dir templates_dir post_template latest_count pages_count')
 
 config = Config(
     posts_dir='_posts',
     templates_dir='_templates',
+    post_template='post.html',
     latest_count=5,
+    pages_count=5,
     )
 
 
 # Post model
 
-class Post(collections.namedtuple('Post',
-    'title body posted is_draft is_listed url')):
+class Post(object):
     """
     The post model. Post metadata is from the file itself. Much cleaner than
     adding headers.
     """
+    def __init__(self, title, body, posted, path, template):
+        self.title = title
+        self.body = body
+        self.posted = posted
+        self.path = path
+        self.template = template
+
+    @property
+    def post_bn(self):
+        return os.path.basename(self.path).rsplit('.', 1)[0]
+
+    @property
+    def is_draft(self):
+        return self.post_bn.startswith('__')
+
+    @property
+    def is_listed(self):
+        return not self.post_bn.startswith('_')
+
+    @property
+    def type(self):
+        return 'post' if self.template.name == config.post_template else 'page'
+
+    @property
+    def url_path(self):
+        if self.type == 'post':
+            url_path = "%s/%s/%s/%s.html" % (
+                self.posted.year,
+                self.posted.month,
+                self.posted.day,
+                self.post_bn,
+            )
+        elif self.type == 'page':
+            url_path = "%s.html" % self.post_bn
+        return url_path
 
     @classmethod
-    def from_file(cls, path):
+    def load(cls, path, template):
         with open(path, 'r') as f:
             contents = f.read()
         title, body = contents.split('\n', 1)
@@ -56,35 +93,42 @@ class Post(collections.namedtuple('Post',
         match = POSTED_PAT.search(body)
         if match:
             posted_ts = int(match.group(1))
-            is_new = False
+            posted = datetime.fromtimestamp(posted_ts)
         else:
-            post_st = os.stat(path)
-            posted_ts = int(post_st.st_ctime)
-            is_new = True
-        posted = datetime.fromtimestamp(posted_ts)
-
-        post_bn = os.path.basename(path).rsplit('.', 1)[0]
-        is_draft = post_bn.startswith('__')
-        is_listed = not post_bn.startswith('_')
-
-        if is_new and not is_draft:
+            posted = datetime.now()
             with open(path, 'a') as f:
-                f.write("\n\n\n<!-- posted: %d -->" % posted_ts)
+                posted_ts = int(time.mktime(posted.timetuple()))
+                f.write("<!-- posted: %d -->" % posted_ts)
 
-        url = "%s/%s/%s/%s.html" % (posted.year, posted.month, posted.day,
-            post_bn)
+        return cls(title, body, posted, path, template)
 
-        return cls(title, body, posted, is_draft, is_listed, url)
+    def render(self):
+        # Create parent dirs
+        try:
+            os.makedirs(os.path.dirname(self.url_path))
+        except OSError:
+            pass
+
+        # Render post
+        with open(self.url_path, 'w') as f:
+            f.write(self.template.render(post=self))
 
 
-def load_posts():
+def load_posts(env):
     """
     Loads all posts from posts directory
     """
 
+
+    post_template = env.get_template(config.post_template)
+    templates = env.list_templates()
     posts = []
+
     for post_path in glob.glob(os.path.join(config.posts_dir, '*.md')):
-        posts.append(Post.from_file(post_path))
+        template_name = os.path.basename(post_path).rsplit('.', 1)[0] + '.html'
+        template = (env.get_template(template_name) if template_name in
+                    templates else post_template)
+        posts.append(Post.load(post_path, template))
 
     logger.info("Loaded %d posts.", len(posts))
 
@@ -96,31 +140,12 @@ def render_posts(env, posts):
     Renders post pages (and listings later)
     """
 
-    post_template = env.get_template('post.html')
-
-    templates = env.list_templates()
-
     for post in posts:
         if post.is_draft:
-            logger.info("Skipped %s", post.url)
+            logger.info("Skipped %s", post.url_path)
             continue
-
-        post_bn = os.path.basename(post.url)
-
-        template = (env.get_template(post_bn) if post_bn in templates else
-            post_template)
-
-        # Create parent dirs
-        try:
-            os.makedirs(os.path.dirname(post.url))
-        except OSError:
-            pass
-
-        # Render post
-        with open(post.url, 'w') as f:
-            f.write(template.render(post=post))
-
-        logger.info("Rendered %s", post.url)
+        post.render()
+        logger.info("Rendered %s", post.url_path)
 
 
 def render_index(env, posts):
@@ -131,16 +156,24 @@ def render_index(env, posts):
     index_template = env.get_template('index.html')
 
     latest = []
+    pages = []
     i = 0
+    j = 0
     for post in posts:
-        if i >= config.latest_count:
+        max_latest = i >= config.latest_count
+        max_pages = j >= config.pages_count
+        if post.is_listed:
+            if post.type == 'post' and not max_latest:
+                latest.append(post)
+                i += 1
+            elif post.type == 'page' and not max_pages:
+                pages.append(post)
+                j += 1
+        if  max_latest and max_pages:
             break
-        elif post.is_listed:
-            latest.append(post)
-            i += 1
 
     with open('index.html', 'w') as f:
-        f.write(index_template.render(latest=latest))
+        f.write(index_template.render(latest=latest, pages=pages))
 
 
 def main():
@@ -149,7 +182,7 @@ def main():
     env = Environment(loader=FileSystemLoader(config.templates_dir))
 
     logger.info("\nLoading posts...")
-    posts = load_posts()
+    posts = load_posts(env)
 
     logger.info("\nRendering posts...")
     render_posts(env, posts)
