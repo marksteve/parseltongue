@@ -1,10 +1,6 @@
 from setuptools import setup
 
 
-with open('requirements.txt') as f:
-    requirements = f.readlines()
-
-
 setup(
     name='parseltongue',
     version='0.0.1',
@@ -14,10 +10,13 @@ setup(
     url='https://github.com/marksteve/parseltongue',
     description="Render HTML pages using Markdown and Jinja",
     license="MIT",
-    install_requires=requirements,
+    install_requires=[
+        'Jinja2==2.6',
+        'markdown2==2.1.0',
+    ],
     entry_points={
         'console_scripts': [
             'parseltongue=parseltongue:main'
-            ]
-        },
-    )
+        ],
+    },
+)
