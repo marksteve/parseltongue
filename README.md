@@ -1,6 +1,6 @@
 # Parseltongue
 
-Yet another blog thingy
+Render HTML pages using Markdown and Jinja
 
 
 ## Try it

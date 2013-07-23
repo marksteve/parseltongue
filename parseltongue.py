@@ -15,7 +15,7 @@ from jinja2 import Environment, FileSystemLoader
 from markdown2 import markdown
 
 
-__version__ = '0.0.0'
+__version__ = '0.0.1'
 POSTED_PAT = re.compile("<!-- posted: (\d+) -->")
 
 
