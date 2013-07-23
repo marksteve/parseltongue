@@ -42,3 +42,7 @@ stuff, feel free to post an issue or a pull request.
 * Archives
 * Categories
 * Configuration
+
+## License
+
+http://marksteve.mit-license.org

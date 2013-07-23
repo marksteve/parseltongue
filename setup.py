@@ -7,11 +7,13 @@ with open('requirements.txt') as f:
 
 setup(
     name='parseltongue',
-    version='0.0.0',
+    version='0.0.1',
     py_modules=['parseltongue'],
     author="Mark Steve Samson",
     author_email="hello@marksteve.com",
-    description="Yet another blog thingy",
+    url='https://github.com/marksteve/parseltongue',
+    description="Render HTML pages using Markdown and Jinja",
+    license="MIT",
     install_requires=requirements,
     entry_points={
         'console_scripts': [
