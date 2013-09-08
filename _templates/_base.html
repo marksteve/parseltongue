@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <h1><a href="/">Example</a></h1>
+        <h2>Nav</h2>
+        <ul>
+        {% for path, level in nav.items() %}
+            <li>
+                <a href="{{ level.index.url }}">{{ path }}</a>
+                <ul>
+                {% for page in level.pages %}
+                    <li><a href="{{ page.url }}">{{ page.src_path }}</a></li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+        {% block content %}{% endblock %}
+    </body>
+</html>
