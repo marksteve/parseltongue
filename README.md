@@ -35,7 +35,9 @@ same name. (e.g. `_src/page.md` uses `_src/page.json` for context) Level
 context (`index.json`) is updated while traversing the source directory. So if
 you set a level context value from the source directory root, that value
 will be included to the context of all other pages. Index pages (`index.md`)
-also get the page listing (`pages`) for its level in its context.
+also get the page listing (`pages`) for its level in its context. Context
+values are passed as arguments on render. They can also be accessed through
+the `context` property of the `Page`.
 
 ## Warning
 
