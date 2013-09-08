@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='parseltongue',
-    version='0.0.2',
+    version='0.1.0',
     py_modules=['parseltongue'],
     author="Mark Steve Samson",
     author_email="hello@marksteve.com",
