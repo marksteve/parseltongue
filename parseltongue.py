@@ -28,8 +28,10 @@ logger.addHandler(logging.StreamHandler())
 
 # Config
 
-Config = collections.namedtuple('Config',
-    'posts_dir templates_dir post_template latest_count pages_count')
+Config = collections.namedtuple(
+    'Config',
+    'posts_dir templates_dir post_template latest_count pages_count',
+)
 
 config = Config(
     posts_dir='_posts',
@@ -37,7 +39,7 @@ config = Config(
     post_template='post.html',
     latest_count=5,
     pages_count=5,
-    )
+)
 
 
 # Post model
@@ -119,7 +121,6 @@ def load_posts(env):
     Loads all posts from posts directory
     """
 
-
     post_template = env.get_template(config.post_template)
     templates = env.list_templates()
     posts = []
@@ -157,20 +158,16 @@ def render_index(env, posts):
 
     latest = []
     pages = []
-    i = 0
-    j = 0
     for post in posts:
-        max_latest = i >= config.latest_count
-        max_pages = j >= config.pages_count
+        max_latest = len(latest) >= config.latest_count
+        max_pages = len(pages) >= config.pages_count
+        if max_latest and max_pages:
+            break
         if post.is_listed:
             if post.type == 'post' and not max_latest:
                 latest.append(post)
-                i += 1
             elif post.type == 'page' and not max_pages:
                 pages.append(post)
-                j += 1
-        if  max_latest and max_pages:
-            break
 
     with open('index.html', 'w') as f:
         f.write(index_template.render(latest=latest, pages=pages))
