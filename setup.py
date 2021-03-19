@@ -11,7 +11,7 @@ setup(
     description="Render HTML pages using Markdown and Jinja",
     license="MIT",
     install_requires=[
-        'Jinja2==2.6',
+        'Jinja2==2.11.3',
         'markdown2==2.1.0',
     ],
     entry_points={
