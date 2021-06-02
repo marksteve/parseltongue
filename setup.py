@@ -12,7 +12,7 @@ setup(
     license="MIT",
     install_requires=[
         'Jinja2==2.6',
-        'markdown2==2.1.0',
+        'markdown2==2.4.0',
     ],
     entry_points={
         'console_scripts': [
